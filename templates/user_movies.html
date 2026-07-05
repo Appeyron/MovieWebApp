@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.name }}'s Favorite Movies{% endblock %}
+
+{% block content %}
+<section class="movies-section">
+    <h1>🎬 {{ user.name }}'s Favorite Movies</h1>
+    <p><a href="{{ url_for('index') }}" class="back-link">← Back to Users</a></p>
+
+    <ul class="movie-list">
+        {% for movie in movies %}
+        <li class="movie-card">
+            <div class="movie-poster">
+                {% if movie.poster and movie.poster != "N/A" %}
+                    <img src="{{ movie.poster }}" alt="{{ movie.title }} Poster" width="120">
+                {% else %}
+                    <div class="no-poster">No Image Available</div>
+                {% endif %}
+            </div>
+            <div class="movie-info">
+                <h2>{{ movie.title }} <span>({{ movie.year }})</span></h2>
+                <p class="rating">⭐ IMDb Rating: {{ movie.rating if movie.rating else 'N/A' }}</p>
+
+                <div class="movie-actions">
+                    <form action="{{ url_for('update_movie', user_id=user_id, movie_id=movie.id) }}" method="post" class="inline-form">
+                        <input type="text" name="new_title" placeholder="New Title" required>
+                        <button type="submit" class="btn-update">Update Title</button>
+                    </form>
+
+                    <form action="{{ url_for('update_movie', user_id=user_id, movie_id=movie.id) if false else url_for('delete_movie', user_id=user_id, movie_id=movie.id) }}" method="post" class="inline-form">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to remove this movie?');">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </li>
+        {% else %}
+        <p class="empty-message">No favorite movies added yet.</p>
+        {% endfor %}
+    </ul>
+
+    <hr>
+
+    <div class="add-movie-box">
+        <h3>Add a new movie via OMDb</h3>
+        <form action="{{ url_for('add_movie', user_id=user_id) }}" method="post">
+            <input type="text" name="title" placeholder="e.g. Inception" required>
+            <button type="submit" class="btn-submit">Add Movie</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
