@@ -1,3 +1,10 @@
+"""
+Data Manager Module.
+
+Handles all persistence operations for users and movies using SQLAlchemy,
+and interfaces with the external OMDb API to fetch cinema metadata.
+"""
+
 import os
 import requests
 from dotenv import load_dotenv
@@ -8,7 +15,14 @@ load_dotenv()
 
 
 class DataManager:
+    """
+    Manages data CRUD operations and external API requests.
+
+    Acts as the middle layer between the Flask routing system and the database.
+    """
+
     def __init__(self):
+        """Initialize the DataManager with environment API configurations."""
         # Fetch the API key from the environment variables
         self.api_key = os.getenv("OMDB_API_KEY")
 
@@ -17,6 +31,15 @@ class DataManager:
             raise ValueError("API Key missing! Please check your .env file.")
 
     def create_user(self, name):
+        """
+        Create and store a new user record in the database.
+
+        Args:
+            name (str): The username for the new profile.
+
+        Returns:
+            User: The newly created User instance.
+        """
         new_user = User(name=name)
         db.session.add(new_user)
         db.session.commit()
@@ -33,7 +56,9 @@ class DataManager:
     def add_movie(self, user_id, title):
         """Fetch the OMDb movie information and add a new movie to a user's favorites."""
         url = f"http://www.omdbapi.com/?apikey={self.api_key}&t={title}"
-        response = requests.get(url)
+
+        # Fixed W3101 by adding a specific timeout value (5 seconds)
+        response = requests.get(url, timeout=5)
 
         if response.status_code == 200:
             data = response.json()
